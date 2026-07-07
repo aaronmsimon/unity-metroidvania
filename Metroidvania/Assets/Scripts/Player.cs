@@ -21,6 +21,9 @@ public class Player : MonoBehaviour
     private Rigidbody2D rb;
 
     private Vector2 moveInput;
+    private bool jumpPressed;
+    private bool jumpReleased;
+
     private int facing = 1;
     private bool isGrounded;
 
@@ -30,14 +33,33 @@ public class Player : MonoBehaviour
     }
 
     private void Update() {
-        ApplyVariableGravity();
-        CheckGrounded();
         Flip();
     }
 
     private void FixedUpdate() {
+        ApplyVariableGravity();
+        CheckGrounded();
+        HandleMovement();
+        HandleJump();
+    }
+
+    private void HandleMovement() {
         float targetSpeed = moveInput.x * speed;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
+    }
+
+    private void HandleJump() {
+        if (jumpPressed && isGrounded) {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            jumpPressed = false;
+            jumpReleased = false;
+        }
+        if (jumpReleased) {
+            if (rb.linearVelocity.y > 0) {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
+            }
+            jumpReleased = false;
+        }
     }
 
     private void ApplyVariableGravity() {
@@ -69,12 +91,11 @@ public class Player : MonoBehaviour
     }
 
     private void OnJump(InputValue value) {
-        if (value.isPressed && isGrounded) {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        if (value.isPressed) {
+            jumpPressed = true;
+            jumpReleased = false;
         } else {
-            if (rb.linearVelocity.y > 0) {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-            }
+            jumpReleased = true;
         }
     }
 
