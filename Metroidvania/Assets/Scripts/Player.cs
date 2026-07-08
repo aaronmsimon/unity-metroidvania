@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     private Rigidbody2D rb;
+    private Animator animator;
 
     private Vector2 moveInput;
     private bool jumpPressed;
@@ -30,10 +31,13 @@ public class Player : MonoBehaviour
     private void Start() {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = normalGravity;
+
+        animator = GetComponentInChildren<Animator>();
     }
 
     private void Update() {
         Flip();
+        HandleAnimations();
     }
 
     private void FixedUpdate() {
@@ -84,6 +88,15 @@ public class Player : MonoBehaviour
         }
 
         transform.localScale = new Vector3(facing, 1, 1);
+    }
+
+    private void HandleAnimations() {
+        animator.SetBool("isJumping", rb.linearVelocity.y > 0.1f);
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetFloat("yVelocity", rb.linearVelocity.y);
+        
+        animator.SetBool("isIdle", Mathf.Abs(moveInput.x) < 0.1f && isGrounded);
+        animator.SetBool("isWalking", Mathf.Abs(moveInput.x) > 0.1f && isGrounded);
     }
 
     private void OnMove(InputValue value) {
