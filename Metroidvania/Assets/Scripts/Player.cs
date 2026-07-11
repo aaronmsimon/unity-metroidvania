@@ -6,7 +6,8 @@ public class Player : MonoBehaviour
     [SerializeField] private PlayerInput playerInput;
 
     [Header("Movement Variables")]
-    [SerializeField] private float speed;
+    [SerializeField] private float walkSpeed;
+    [SerializeField] private float sprintSpeed;
     [SerializeField] private float jumpForce;
     [SerializeField] private float jumpCutMultiplier = 0.5f;
     [SerializeField] private float normalGravity;
@@ -22,6 +23,7 @@ public class Player : MonoBehaviour
     private Animator animator;
 
     private Vector2 moveInput;
+    private bool sprintPressed;
     private bool jumpPressed;
     private bool jumpReleased;
 
@@ -48,7 +50,8 @@ public class Player : MonoBehaviour
     }
 
     private void HandleMovement() {
-        float targetSpeed = moveInput.x * speed;
+        float currentSpeed = sprintPressed ? sprintSpeed : walkSpeed;
+        float targetSpeed = moveInput.x * currentSpeed;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
     }
 
@@ -95,12 +98,18 @@ public class Player : MonoBehaviour
         animator.SetBool("isGrounded", isGrounded);
         animator.SetFloat("yVelocity", rb.linearVelocity.y);
         
-        animator.SetBool("isIdle", Mathf.Abs(moveInput.x) < 0.1f && isGrounded);
-        animator.SetBool("isWalking", Mathf.Abs(moveInput.x) > 0.1f && isGrounded);
+        bool isMoving = Mathf.Abs(moveInput.x) > 0.1f && isGrounded;
+        animator.SetBool("isIdle", !isMoving && isGrounded);
+        animator.SetBool("isWalking", isMoving && !sprintPressed);
+        animator.SetBool("isSprinting", isMoving && sprintPressed);
     }
 
     private void OnMove(InputValue value) {
         moveInput = value.Get<Vector2>();
+    }
+
+    private void OnSprint(InputValue value) {
+        sprintPressed = value.isPressed;
     }
 
     private void OnJump(InputValue value) {

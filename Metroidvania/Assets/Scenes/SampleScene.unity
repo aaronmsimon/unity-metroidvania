@@ -4221,7 +4221,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   playerInput: {fileID: 457329644}
-  speed: 8
+  walkSpeed: 5
+  sprintSpeed: 8
   jumpForce: 20
   jumpCutMultiplier: 0.5
   normalGravity: 6
