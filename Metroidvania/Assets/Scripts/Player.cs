@@ -19,7 +19,15 @@ public class Player : MonoBehaviour
     [SerializeField] private float groundCheckRadius;
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("Slide Settings")]
+    [SerializeField] private float slideDuration = 0.6f;
+    [SerializeField] private float slideSpeed = 12;
+    [SerializeField] private float slideStopDuration = 0.15f;
+    [SerializeField] private float slideHeight;
+    [SerializeField] private Vector2 slideOffset;
+
     private Rigidbody2D rb;
+    private CapsuleCollider2D playerCollider;
     private Animator animator;
 
     private Vector2 moveInput;
@@ -30,22 +38,41 @@ public class Player : MonoBehaviour
     private int facing = 1;
     private bool isGrounded;
 
+    private bool isSliding;
+    private bool slideInputLocked;
+    private float slideTimer;
+    private float slideStopTimer;
+    private float normalHeight;
+    private Vector2 normalOffset;
+
     private void Start() {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = normalGravity;
+
+        playerCollider = GetComponent<CapsuleCollider2D>();
+        normalHeight = playerCollider.size.y;
+        normalOffset = playerCollider.offset;
 
         animator = GetComponentInChildren<Animator>();
     }
 
     private void Update() {
-        Flip();
+        if (!isSliding) {
+            Flip();            
+        }
+
         HandleAnimations();
+        HandleSlide();
     }
 
     private void FixedUpdate() {
         ApplyVariableGravity();
         CheckGrounded();
-        HandleMovement();
+
+        if (!isSliding) {
+            HandleMovement();
+        }
+
         HandleJump();
     }
 
@@ -96,12 +123,55 @@ public class Player : MonoBehaviour
     private void HandleAnimations() {
         animator.SetBool("isJumping", rb.linearVelocity.y > 0.1f);
         animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isSliding", isSliding);
+
         animator.SetFloat("yVelocity", rb.linearVelocity.y);
         
         bool isMoving = Mathf.Abs(moveInput.x) > 0.1f && isGrounded;
-        animator.SetBool("isIdle", !isMoving && isGrounded);
-        animator.SetBool("isWalking", isMoving && !sprintPressed);
-        animator.SetBool("isSprinting", isMoving && sprintPressed);
+        animator.SetBool("isIdle", !isMoving && isGrounded && !isSliding);
+        animator.SetBool("isWalking", isMoving && !sprintPressed && !isSliding);
+        animator.SetBool("isSprinting", isMoving && sprintPressed && !isSliding);
+    }
+
+    private void HandleSlide() {
+        if (isSliding) {
+            slideTimer -= Time.deltaTime;
+            rb.linearVelocity = new Vector2(slideSpeed * facing, rb.linearVelocity.y);
+
+            // Done sliding
+            if (slideTimer <= 0) {
+                isSliding = false;
+                slideStopTimer = slideStopDuration;
+                SetColliderNormal();
+            }
+        }
+
+        if (slideStopTimer > 0) {
+            slideStopTimer -= Time.deltaTime;
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        }
+
+        // Start sliding
+        if (isGrounded && sprintPressed && moveInput.y < -0.1f && !isSliding && !slideInputLocked) {
+            isSliding = true;
+            slideInputLocked = true;
+            slideTimer = slideDuration;
+            SetColliderSlide();
+        }
+
+        if (slideStopTimer < 0 && moveInput.y >= -0.1f) {
+            slideInputLocked = false;
+        }
+    }
+
+    private void SetColliderNormal() {
+        playerCollider.size = new Vector2(playerCollider.size.x, normalHeight);
+        playerCollider.offset = normalOffset;
+    }
+
+    private void SetColliderSlide() {
+        playerCollider.size = new Vector2(playerCollider.size.x, slideHeight);
+        playerCollider.offset = slideOffset;
     }
 
     private void OnMove(InputValue value) {
