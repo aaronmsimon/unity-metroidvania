@@ -19,6 +19,10 @@ public class Player : MonoBehaviour
     [SerializeField] private float groundCheckRadius;
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("Crouch Check")]
+    [SerializeField] private Transform headCheck;
+    [SerializeField] private float headCheckRadius = 0.2f;
+
     [Header("Slide Settings")]
     [SerializeField] private float slideDuration = 0.6f;
     [SerializeField] private float slideSpeed = 12;
@@ -121,6 +125,8 @@ public class Player : MonoBehaviour
     }
 
     private void HandleAnimations() {
+        bool isCrouching = animator.GetBool("isCrouching");
+
         animator.SetBool("isJumping", rb.linearVelocity.y > 0.1f);
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isSliding", isSliding);
@@ -128,9 +134,9 @@ public class Player : MonoBehaviour
         animator.SetFloat("yVelocity", rb.linearVelocity.y);
         
         bool isMoving = Mathf.Abs(moveInput.x) > 0.1f && isGrounded;
-        animator.SetBool("isIdle", !isMoving && isGrounded && !isSliding);
-        animator.SetBool("isWalking", isMoving && !sprintPressed && !isSliding);
-        animator.SetBool("isSprinting", isMoving && sprintPressed && !isSliding);
+        animator.SetBool("isIdle", !isMoving && isGrounded && !isSliding && !isCrouching);
+        animator.SetBool("isWalking", isMoving && !sprintPressed && !isSliding && !isCrouching);
+        animator.SetBool("isSprinting", isMoving && sprintPressed && !isSliding && !isCrouching);
     }
 
     private void HandleSlide() {
@@ -142,7 +148,7 @@ public class Player : MonoBehaviour
             if (slideTimer <= 0) {
                 isSliding = false;
                 slideStopTimer = slideStopDuration;
-                SetColliderNormal();
+                TryStandUp();
             }
         }
 
@@ -174,6 +180,19 @@ public class Player : MonoBehaviour
         playerCollider.offset = slideOffset;
     }
 
+    private void TryStandUp() {
+        bool canStandUp = !Physics2D.OverlapCircle(headCheck.position, headCheckRadius, groundLayer);
+        Debug.Log($"can{(canStandUp ? "" : "'t")} stand up");
+
+        if(canStandUp) {
+            SetColliderNormal();
+            animator.SetBool("isCrouching", false);
+        } else {
+            SetColliderSlide();
+            animator.SetBool("isCrouching", true);
+        }
+    }
+
     private void OnMove(InputValue value) {
         moveInput = value.Get<Vector2>();
     }
@@ -194,5 +213,8 @@ public class Player : MonoBehaviour
     private void OnDrawGizmosSelected() {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(headCheck.position, headCheckRadius);
     }
 }
