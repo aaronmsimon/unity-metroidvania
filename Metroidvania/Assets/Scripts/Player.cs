@@ -61,6 +61,8 @@ public class Player : MonoBehaviour
     }
 
     private void Update() {
+        TryStandUp();
+
         if (!isSliding) {
             Flip();            
         }
@@ -181,10 +183,14 @@ public class Player : MonoBehaviour
     }
 
     private void TryStandUp() {
-        bool canStandUp = !Physics2D.OverlapCircle(headCheck.position, headCheckRadius, groundLayer);
-        Debug.Log($"can{(canStandUp ? "" : "'t")} stand up");
+        if (isSliding) {
+            animator.SetBool("isCrouching", false);
+            return;
+        }
 
-        if(canStandUp) {
+        bool shouldCrouch = moveInput.y < -0.1f || Physics2D.OverlapCircle(headCheck.position, headCheckRadius, groundLayer);
+
+        if(!shouldCrouch) {
             SetColliderNormal();
             animator.SetBool("isCrouching", false);
         } else {
