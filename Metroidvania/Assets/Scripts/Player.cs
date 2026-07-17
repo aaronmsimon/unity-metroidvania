@@ -30,14 +30,18 @@ public class Player : MonoBehaviour
     [SerializeField] private float slideHeight;
     [SerializeField] private Vector2 slideOffset;
 
+    public PlayerState CurrentState;
+    public PlayerIdleState IdleState;
+    public PlayerJumpState JumpState;
+
     private Rigidbody2D rb;
     private CapsuleCollider2D playerCollider;
     private Animator animator;
 
     private Vector2 moveInput;
     private bool sprintPressed;
-    private bool jumpPressed;
-    private bool jumpReleased;
+    public bool JumpPressed;
+    public bool JumpReleased;
 
     private int facing = 1;
     private bool isGrounded;
@@ -49,18 +53,27 @@ public class Player : MonoBehaviour
     private float normalHeight;
     private Vector2 normalOffset;
 
-    private void Start() {
+    private void Awake() {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = normalGravity;
+
+        animator = GetComponentInChildren<Animator>();
 
         playerCollider = GetComponent<CapsuleCollider2D>();
         normalHeight = playerCollider.size.y;
         normalOffset = playerCollider.offset;
 
-        animator = GetComponentInChildren<Animator>();
+        IdleState = new PlayerIdleState(this);
+        JumpState = new PlayerJumpState(this);
+    }
+
+    private void Start() {
+        ChangeState(IdleState);
     }
 
     private void Update() {
+        CurrentState.Update();
+
         TryStandUp();
 
         if (!isSliding) {
@@ -72,14 +85,22 @@ public class Player : MonoBehaviour
     }
 
     private void FixedUpdate() {
-        ApplyVariableGravity();
+        CurrentState.FixedUpdate();
+
         CheckGrounded();
 
         if (!isSliding) {
             HandleMovement();
         }
+    }
 
-        HandleJump();
+    public void ChangeState(PlayerState newState) {
+        if (CurrentState != null) {
+            CurrentState.Exit();
+        }
+            
+        CurrentState = newState;
+        CurrentState.Enter();
     }
 
     private void HandleMovement() {
@@ -88,21 +109,7 @@ public class Player : MonoBehaviour
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
     }
 
-    private void HandleJump() {
-        if (jumpPressed && isGrounded) {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            jumpPressed = false;
-            jumpReleased = false;
-        }
-        if (jumpReleased) {
-            if (rb.linearVelocity.y > 0) {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * jumpCutMultiplier);
-            }
-            jumpReleased = false;
-        }
-    }
-
-    private void ApplyVariableGravity() {
+    public void ApplyVariableGravity() {
         if (rb.linearVelocity.y < -0.1f) {
             rb.gravityScale = fallGravity;
         } else if (rb.linearVelocity.y > 0.1f) {
@@ -129,7 +136,6 @@ public class Player : MonoBehaviour
     private void HandleAnimations() {
         bool isCrouching = animator.GetBool("isCrouching");
 
-        animator.SetBool("isJumping", rb.linearVelocity.y > 0.1f);
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isSliding", isSliding);
 
@@ -209,10 +215,10 @@ public class Player : MonoBehaviour
 
     private void OnJump(InputValue value) {
         if (value.isPressed) {
-            jumpPressed = true;
-            jumpReleased = false;
+            JumpPressed = true;
+            JumpReleased = false;
         } else {
-            jumpReleased = true;
+            JumpReleased = true;
         }
     }
 
@@ -223,4 +229,14 @@ public class Player : MonoBehaviour
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(headCheck.position, headCheckRadius);
     }
+
+    public Animator Animator => animator;
+    public Rigidbody2D Rb => rb;
+    public float JumpForce => jumpForce;
+    public bool IsGrounded => isGrounded;
+    public float JumpCutMultiplier => jumpCutMultiplier;
+    public bool SprintPressed => sprintPressed;
+    public float WalkSpeed => walkSpeed;
+    public float SprintSpeed => sprintSpeed;
+    public float Facing => facing;
 }
