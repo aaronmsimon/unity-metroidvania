@@ -1,0 +1,40 @@
+using UnityEngine;
+
+public class PlayerCrouchState : PlayerState
+{
+    public PlayerCrouchState(Player player) : base(player) { }
+
+    public override void Enter() {
+        base.Enter();
+
+        animator.SetBool("isCrouching", true);
+        player.SetColliderSlide();
+    }
+
+    public override void Update() {
+        base.Update();
+
+        if (JumpPressed) {
+            player.ChangeState(player.JumpState);
+        } else if (MoveInput.y > -0.1f) {
+            player.ChangeState(player.IdleState);
+        }
+    }
+
+    public override void FixedUpdate() {
+        base.FixedUpdate();
+
+        if (Mathf.Abs(MoveInput.x) > 0.1f) {
+            rb.linearVelocity = new Vector2(player.Facing * player.WalkSpeed, rb.linearVelocity.y);
+        } else {
+            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        }
+    }
+
+    public override void Exit() {
+        base.Exit();
+
+        animator.SetBool("isCrouching", false);
+        player.SetColliderNormal();
+    }
+}

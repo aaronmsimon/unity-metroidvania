@@ -1,9 +1,12 @@
+using UnityEngine;
+
 public class PlayerIdleState : PlayerState
 {
     public PlayerIdleState(Player player) : base(player) { }
 
     public override void Enter() {
         animator.SetBool("isIdle", true);
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
     }
 
     public override void Update() {
@@ -12,6 +15,8 @@ public class PlayerIdleState : PlayerState
         if (JumpPressed) {
             JumpPressed = false;
             player.ChangeState(player.JumpState);
+        } else if (Mathf.Abs(MoveInput.x) > 0.1f) {
+            player.ChangeState(player.MoveState);
         }
     }
 

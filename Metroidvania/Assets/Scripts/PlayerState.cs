@@ -15,6 +15,7 @@ public abstract class PlayerState
         set => player.JumpReleased = value;
     }
     protected bool SprintPressed => player.SprintPressed;
+    protected Vector2 MoveInput => player.MoveInput;
 
     public PlayerState(Player player) {
         this.player = player;
