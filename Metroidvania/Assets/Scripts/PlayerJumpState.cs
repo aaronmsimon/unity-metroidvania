@@ -17,7 +17,7 @@ public class PlayerJumpState : PlayerState
     public override void Update() {
         base.Update();
 
-        if (player.IsGrounded && rb.linearVelocity.y < 0) {
+        if (player.IsGrounded && rb.linearVelocity.y < 0.1f) {
             player.ChangeState(player.IdleState);
         }
     }
@@ -33,7 +33,7 @@ public class PlayerJumpState : PlayerState
         }
 
         float currentSpeed = SprintPressed ? player.SprintSpeed : player.WalkSpeed;
-        float targetSpeed = player.Facing * currentSpeed;
+        float targetSpeed = currentSpeed * MoveInput.x;
         rb.linearVelocity = new Vector2(targetSpeed, rb.linearVelocity.y);
     }
 

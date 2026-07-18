@@ -34,6 +34,8 @@ public class Player : MonoBehaviour
     public PlayerIdleState IdleState;
     public PlayerJumpState JumpState;
     public PlayerMoveState MoveState;
+    public PlayerCrouchState CrouchState;
+    public PlayerSlideState SlideState;
 
     private Rigidbody2D rb;
     private CapsuleCollider2D playerCollider;
@@ -48,9 +50,6 @@ public class Player : MonoBehaviour
     private bool isGrounded;
 
     private bool isSliding;
-    private bool slideInputLocked;
-    private float slideTimer;
-    private float slideStopTimer;
     private float normalHeight;
     private Vector2 normalOffset;
 
@@ -67,6 +66,8 @@ public class Player : MonoBehaviour
         IdleState = new PlayerIdleState(this);
         JumpState = new PlayerJumpState(this);
         MoveState = new PlayerMoveState(this);
+        CrouchState = new PlayerCrouchState(this);
+        SlideState = new PlayerSlideState(this);
     }
 
     private void Start() {
@@ -76,14 +77,11 @@ public class Player : MonoBehaviour
     private void Update() {
         CurrentState.Update();
 
-        TryStandUp();
-
         if (!isSliding) {
             Flip();            
         }
 
         HandleAnimations();
-        HandleSlide();
     }
 
     private void FixedUpdate() {
@@ -115,6 +113,10 @@ public class Player : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
     }
 
+    public bool CheckForCeiling() {
+        return Physics2D.OverlapCircle(headCheck.position, headCheckRadius, groundLayer);
+    }
+
     private void Flip() {
         if (MoveInput.x > 0.1f) {
             facing = 1;
@@ -126,70 +128,18 @@ public class Player : MonoBehaviour
     }
 
     private void HandleAnimations() {
-        bool isCrouching = animator.GetBool("isCrouching");
-
         animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isSliding", isSliding);
-
         animator.SetFloat("yVelocity", rb.linearVelocity.y);
     }
 
-    private void HandleSlide() {
-        if (isSliding) {
-            slideTimer -= Time.deltaTime;
-            rb.linearVelocity = new Vector2(slideSpeed * facing, rb.linearVelocity.y);
-
-            // Done sliding
-            if (slideTimer <= 0) {
-                isSliding = false;
-                slideStopTimer = slideStopDuration;
-                TryStandUp();
-            }
-        }
-
-        if (slideStopTimer > 0) {
-            slideStopTimer -= Time.deltaTime;
-            rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-        }
-
-        // Start sliding
-        if (isGrounded && sprintPressed && MoveInput.y < -0.1f && !isSliding && !slideInputLocked) {
-            isSliding = true;
-            slideInputLocked = true;
-            slideTimer = slideDuration;
-            SetColliderSlide();
-        }
-
-        if (slideStopTimer < 0 && MoveInput.y >= -0.1f) {
-            slideInputLocked = false;
-        }
-    }
-
-    private void SetColliderNormal() {
+    public void SetColliderNormal() {
         playerCollider.size = new Vector2(playerCollider.size.x, normalHeight);
         playerCollider.offset = normalOffset;
     }
 
-    private void SetColliderSlide() {
+    public void SetColliderSlide() {
         playerCollider.size = new Vector2(playerCollider.size.x, slideHeight);
         playerCollider.offset = slideOffset;
-    }
-
-    private void TryStandUp() {
-        if (isSliding) {
-            animator.SetBool("isCrouching", false);
-            return;
-        }
-
-        bool shouldCrouch = MoveInput.y < -0.1f || Physics2D.OverlapCircle(headCheck.position, headCheckRadius, groundLayer);
-
-        if(!shouldCrouch) {
-            SetColliderNormal();
-            animator.SetBool("isCrouching", false);
-        } else {
-            SetColliderSlide();
-            animator.SetBool("isCrouching", true);
-        }
     }
 
     private void OnMove(InputValue value) {
@@ -226,4 +176,7 @@ public class Player : MonoBehaviour
     public float WalkSpeed => walkSpeed;
     public float SprintSpeed => sprintSpeed;
     public float Facing => facing;
+    public float SlideDuration => slideDuration;
+    public float SlideSpeed => slideSpeed;
+    public float SlideStopDuration => slideStopDuration;
 }

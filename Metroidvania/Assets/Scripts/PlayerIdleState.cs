@@ -17,6 +17,8 @@ public class PlayerIdleState : PlayerState
             player.ChangeState(player.JumpState);
         } else if (Mathf.Abs(MoveInput.x) > 0.1f) {
             player.ChangeState(player.MoveState);
+        } else if (MoveInput.y < -0.1f) {
+            player.ChangeState(player.CrouchState);
         }
     }
 

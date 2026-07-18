@@ -16,7 +16,7 @@ public class PlayerCrouchState : PlayerState
 
         if (JumpPressed) {
             player.ChangeState(player.JumpState);
-        } else if (MoveInput.y > -0.1f) {
+        } else if (MoveInput.y > -0.1f && !player.CheckForCeiling()) {
             player.ChangeState(player.IdleState);
         }
     }
