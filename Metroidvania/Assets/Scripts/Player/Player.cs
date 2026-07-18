@@ -30,6 +30,12 @@ public class Player : MonoBehaviour
     [SerializeField] private float slideHeight;
     [SerializeField] private Vector2 slideOffset;
 
+    [Header("Attack Settings")]
+    [SerializeField] private int damage;
+    [SerializeField] private float attackRadius = 0.5f;
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private LayerMask enemyLayer;
+
     public PlayerState CurrentState;
     public PlayerIdleState IdleState;
     public PlayerJumpState JumpState;
@@ -41,10 +47,10 @@ public class Player : MonoBehaviour
     private CapsuleCollider2D playerCollider;
     private Animator animator;
 
-    public Vector2 MoveInput;
+    private Vector2 moveInput;
     private bool sprintPressed;
-    public bool JumpPressed;
-    public bool JumpReleased;
+    private bool jumpPressed;
+    private bool jumpReleased;
 
     private int facing = 1;
     private bool isGrounded;
@@ -159,12 +165,23 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void OnAttack(InputValue value) {
+        Collider2D enemy = Physics2D.OverlapCircle(attackPoint.position, attackRadius, enemyLayer);
+
+        if (enemy != null) {
+            enemy.gameObject.GetComponent<Health>().ChangeHealth(-damage);
+        }
+    }
+
     private void OnDrawGizmosSelected() {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(headCheck.position, headCheckRadius);
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 
     public Animator Animator => animator;
@@ -179,4 +196,8 @@ public class Player : MonoBehaviour
     public float SlideDuration => slideDuration;
     public float SlideSpeed => slideSpeed;
     public float SlideStopDuration => slideStopDuration;
+
+    public Vector2 MoveInput { get { return moveInput; } set { moveInput = value; } }
+    public bool JumpPressed { get { return jumpPressed; } set { jumpPressed = value; } }
+    public bool JumpReleased { get { return jumpReleased; } set { jumpReleased = value; } }
 }
