@@ -8,6 +8,7 @@ public class Combat : MonoBehaviour
     [SerializeField] private float attackCoolDown = 1.5f;
     [SerializeField] private Transform attackPoint;
     [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private Animator hitFX;
 
     public bool CanAttack => Time.time >= nextAttackTime;
 
@@ -31,6 +32,7 @@ public class Combat : MonoBehaviour
         Collider2D enemy = Physics2D.OverlapCircle(attackPoint.position, attackRadius, enemyLayer);
 
         if (enemy != null) {
+            hitFX.Play("HitFX");
             enemy.gameObject.GetComponent<Health>().ChangeHealth(-damage);
         }
     }
