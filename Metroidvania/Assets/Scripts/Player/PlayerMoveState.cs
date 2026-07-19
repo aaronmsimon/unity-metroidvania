@@ -11,7 +11,9 @@ public class PlayerMoveState : PlayerState
     public override void Update() {
         base.Update();
 
-        if (JumpPressed) {
+        if (AttackPressed && combat.CanAttack) {
+            player.ChangeState(player.AttackState);
+        } else if (JumpPressed) {
             player.ChangeState(player.JumpState);
         } else if (Mathf.Abs(MoveInput.x) < 0.1f) {
             player.ChangeState(player.IdleState);

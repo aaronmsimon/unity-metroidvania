@@ -5,6 +5,7 @@ public abstract class PlayerState
     protected Player player;
     protected Animator animator;
     protected Rigidbody2D rb;
+    protected Combat combat;
 
     protected bool JumpPressed {
         get => player.JumpPressed;
@@ -16,11 +17,13 @@ public abstract class PlayerState
     }
     protected bool SprintPressed => player.SprintPressed;
     protected Vector2 MoveInput => player.MoveInput;
+    protected bool AttackPressed => player.AttackPressed;
 
     public PlayerState(Player player) {
         this.player = player;
         animator = player.Animator;
         rb = player.Rb;
+        combat = player.Combat;
     }
 
     public virtual void Enter() { }
@@ -28,4 +31,6 @@ public abstract class PlayerState
 
     public virtual void Update() { }
     public virtual void FixedUpdate() { }
+
+    public virtual void AttackAnimationFinished() { }
 }

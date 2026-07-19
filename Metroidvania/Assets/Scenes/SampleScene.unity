@@ -6718,12 +6718,6 @@ MonoBehaviour:
   slideStopDuration: 0.15
   slideHeight: 0.95
   slideOffset: {x: -0.1, y: -1.15}
-  damage: 3
-  attackRadius: 0.5
-  attackPoint: {fileID: 1009106053}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!114 &457329644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7073,6 +7067,7 @@ GameObject:
   - component: {fileID: 577989082}
   - component: {fileID: 577989083}
   - component: {fileID: 577989084}
+  - component: {fileID: 577989085}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -7176,6 +7171,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &577989085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 577989081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e708a6edf60f3f4dab09b3f1468f4b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Combat
+  damage: 2
+  attackRadius: 0.5
+  attackPoint: {fileID: 1009106053}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
