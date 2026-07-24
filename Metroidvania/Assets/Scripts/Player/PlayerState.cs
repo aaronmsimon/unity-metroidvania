@@ -18,6 +18,7 @@ public abstract class PlayerState
     protected bool SprintPressed => player.SprintPressed;
     protected Vector2 MoveInput => player.MoveInput;
     protected bool AttackPressed => player.AttackPressed;
+    protected bool SpellcastPressed => player.SpellcastPressed;
 
     public PlayerState(Player player) {
         this.player = player;
@@ -32,5 +33,5 @@ public abstract class PlayerState
     public virtual void Update() { }
     public virtual void FixedUpdate() { }
 
-    public virtual void AttackAnimationFinished() { }
+    public virtual void AnimationFinished() { }
 }

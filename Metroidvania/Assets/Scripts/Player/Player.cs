@@ -37,7 +37,7 @@ public class Player : MonoBehaviour
     public PlayerCrouchState CrouchState;
     public PlayerSlideState SlideState;
     public PlayerAttackState AttackState;
-
+    public PlayerSpellcastState SpellcastState;
 
     private Rigidbody2D rb;
     private CapsuleCollider2D playerCollider;
@@ -49,6 +49,7 @@ public class Player : MonoBehaviour
     private bool jumpPressed;
     private bool jumpReleased;
     private bool attackPressed;
+    private bool spellcastPressed;
 
     private int facing = 1;
     private bool isGrounded;
@@ -74,6 +75,7 @@ public class Player : MonoBehaviour
         CrouchState = new PlayerCrouchState(this);
         SlideState = new PlayerSlideState(this);
         AttackState = new PlayerAttackState(this);
+        SpellcastState = new PlayerSpellcastState(this);
     }
 
     private void Start() {
@@ -148,8 +150,8 @@ public class Player : MonoBehaviour
         playerCollider.offset = slideOffset;
     }
 
-    public void AttackAnimationFinished() {
-        CurrentState.AttackAnimationFinished();
+    public void AnimationFinished() {
+        CurrentState.AnimationFinished();
     }
 
     private void OnMove(InputValue value) {
@@ -171,6 +173,10 @@ public class Player : MonoBehaviour
 
     private void OnAttack(InputValue value) {
         attackPressed = value.isPressed;
+    }
+
+    private void OnSpellcast(InputValue value) {
+        spellcastPressed = value.isPressed;
     }
 
     private void OnDrawGizmosSelected() {
@@ -200,4 +206,5 @@ public class Player : MonoBehaviour
     public bool JumpPressed { get { return jumpPressed; } set { jumpPressed = value; } }
     public bool JumpReleased { get { return jumpReleased; } set { jumpReleased = value; } }
     public bool AttackPressed => attackPressed;
+    public bool SpellcastPressed => spellcastPressed;
 }

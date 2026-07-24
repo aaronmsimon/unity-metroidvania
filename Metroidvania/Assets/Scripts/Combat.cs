@@ -21,7 +21,7 @@ public class Combat : MonoBehaviour
     }
 
     public void AttackAnimationFinished() {
-        player.AttackAnimationFinished();
+        player.AnimationFinished();
     }
 
     public void Attack() {

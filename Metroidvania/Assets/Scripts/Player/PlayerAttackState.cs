@@ -11,7 +11,7 @@ public class PlayerAttackState : PlayerState
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
     }
 
-    public override void AttackAnimationFinished() {
+    public override void AnimationFinished() {
         if (Mathf.Abs(MoveInput.x) > 0.1f) {
             player.ChangeState(player.MoveState);
         } else {
